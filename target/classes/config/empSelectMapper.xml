@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="empSelect">
+
+	<!-- 검색된 컬럼명와 자바 property 매칭하기 -->
+	<resultMap type="employees" id="empSelectMap">
+		<id column="employee_id" property="employeeId"/> <!-- 대소문자 가림 -->
+		<result column="last_name" property="lastName"/>
+		<result column="email" property="email"/>
+		<result column="hire_date" property="hireDate"/>
+		<result column="job_id" property="jobId"/>
+		<result column="salary" property="salary"/>
+	</resultMap>
+	
+	<!-- 자주 사용되는 반복코드를 sql로 만들어 놓고, include하여 사용한다. -->
+	<sql id="empSql">
+		select employee_id, last_name, email, hire_date,
+	 	job_id, salary from employees
+	</sql>
+
+	<!-- 전체검색: 컬럼명 별칭으로 자바객체에 바인딩 시키기 -->
+	<!-- <select id="selectAll" resultType="employees">
+	     select employee_id as employeeId, last_name as lastName, email, hire_date as hireDate,
+	     job_id as jobId, salary from employees
+ 	 </select>
+   -->
+  
+	<!-- <select id="selectAll" resultMap="empSelectMap">
+	     select employee_id, last_name, email, hire_date,
+	     job_id, salary from employees
+ 	 </select> -->
+  
+  <!-- SqlMapConfig.xml의 <settings> 태그 확인 -->
+  <select id="selectAll" resultType="employees">
+     <include refid="empSql"/>
+  </select>
+  
+  <!-- 사원이름에 해당하는 정보 검색 -->
+  <select id="selectByEmpId" parameterType="int" resultType="employees">
+	  <include refid="empSql"/> 
+	  where employee_id=#{_parameter}
+  </select>
+  
+  <!-- 정렬대상을 전달받아 정렬하기 -->
+  <select id="selectByOrder" parameterType="String" resultType="employees">
+  	<include refid="empSql"/> 
+  	order by ${_parameter} <!-- 동적 쿼리 / 비권장 표현 -->
+  </select>
+  
+  <!-- salary를 인수로 전달 받아 salary보다 적게 받는 사원의 정보 검색 -->
+  <select id="selectWhereSalary" parameterType="int" resultType="employees">
+  	<include refid="empSql"/> 
+  	where salary &lt;= #{_parameter} <!-- '>'는 태그의 시작이 아니어서 문제가 되지는 않는다. -->
+  	order by salary desc
+  </select>
+  
+  <!-- salary가 최소 ~ 최대 사이 검색하기 -->
+  <select id="selectByMinMax" parameterType="map" resultType="employees">
+  	<include refid="empSql"/>
+  	where salary between #{min} and #{max}
+  	order by salary
+  </select>
+  
+</mapper>

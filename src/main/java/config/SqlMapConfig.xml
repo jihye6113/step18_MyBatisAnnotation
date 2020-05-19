@@ -29,7 +29,6 @@
 		</environment>
 	</environments>
 	<mappers>
-		<mapper resource="config/empMapper.xml" />
-		<mapper resource="config/empSelectMapper.xml" />
+		<mapper class="kosta.orm.repository.EmployeesMapper"/>
 	</mappers>
 </configuration>

@@ -9,24 +9,6 @@ import org.apache.ibatis.session.SqlSession;
 import kosta.orm.domain.Employees;
 
 public class EmpDAO {
-
-	/**
-	 * 사원 first_name 가져오기
-	 * */
-	public void selectByName() {
-		SqlSession session = null;
-		try {
-			session = Dbutil.getSession();
-			List<String> list = session.selectList("emp.selectByName"); // mapper의 id
-			
-			for(String name:list) {
-				System.out.println(name);
-			}
-		} finally {
-			Dbutil.sessionClose(session);
-		}
-	}
-	
 	/**
 	 * 등록하기
 	 * */
@@ -35,7 +17,11 @@ public class EmpDAO {
 		Boolean state = false;
 		try {
 			session = Dbutil.getSession();
-			state = session.insert("emp.empInsert", employees)>0 ? true: false;
+			
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+
+			state = mapper.insert(employees)>0 ? true: false; // mapper의 메서드 사용
+			
 			System.out.println("state  = "+ state);
 		} finally {
 			Dbutil.sessionClose(session, state);
@@ -50,7 +36,10 @@ public class EmpDAO {
 		Boolean state = false;
 		try {
 			session = Dbutil.getSession();
-			state = session.delete("emp.empDelete", employeeId)>0?true:false;
+			
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+			
+			state = (mapper.delete(employeeId))>0?true:false;
 			System.out.println("state  = "+ state);
 		} finally {
 			Dbutil.sessionClose(session, state);
@@ -65,7 +54,10 @@ public class EmpDAO {
 		Boolean state = false;
 		try {
 			session = Dbutil.getSession();
-			state = session.update("emp.empUpdate", employees)>0?true:false;
+			
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+			
+			state = (mapper.update(employees))>0?true:false;
 			System.out.println("state  = "+ state);
 		} finally {
 			Dbutil.sessionClose(session, state);
@@ -81,8 +73,10 @@ public class EmpDAO {
 		SqlSession session=null;
 		try {
 			session = Dbutil.getSession();
-			List<Employees> list = 
-					session.selectList("empSelect.selectAll");
+			
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+			
+			List<Employees> list = mapper.selectAll();
 			
 			for(Employees emp:list)
 			    System.out.println(emp);
@@ -100,10 +94,32 @@ public class EmpDAO {
 		SqlSession session=null;
 		try {
 			session = Dbutil.getSession();
-			Employees emp = session.selectOne("empSelect.selectByEmpId", employeeId);
+			
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+			Employees emp = mapper.selectById(employeeId);
+			
 			System.out.println(emp);
 			
 		}finally {
+			Dbutil.sessionClose(session);
+		}
+	}
+	
+	/**
+	 * if문 test
+	 * */
+	public void ifTest(Employees emp) {
+		SqlSession session = null;
+		try {
+			session = Dbutil.getSession();
+			EmployeesMapper mapper = session.getMapper(EmployeesMapper.class);
+			
+			List<Employees> list = mapper.ifSelect(emp);
+			
+			for(Employees e : list) {
+				System.out.println(e);
+			}
+		} finally {
 			Dbutil.sessionClose(session);
 		}
 	}
